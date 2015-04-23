@@ -1,20 +1,12 @@
 package com.github.lambda;
 
-public class Franc {
-	private int amount;
+public class Franc extends Money {
 
-	public Franc(int amount) {
-		this.amount = amount;
-	};
-	
-	public Dollar times(int multiplier) {
-		return new Dollar(amount * multiplier);
+	public Franc(int amount, String currency) {
+		super(amount, currency);
 	};
 
-	@Override
-	public boolean equals(Object object) {
-		Franc that = (Franc) object;
-		return this.amount == that.amount;
-	}
-
+	public Money times(int multiplier) {
+		return new Franc(amount * multiplier, "CHF");
+	};
 }
