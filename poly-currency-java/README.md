@@ -2,9 +2,20 @@
 
 [Ref: Test Driven Development: By Example][http://www.amazon.com/Test-Driven-Development-By-Example/dp/0321146530]
 
+## Day 3
+
+**TODO**
+
+- 더하기 (가짜로 먼저 구현)
+
+**LESSON**
+
+- 실험해본 걸 물리고, 또 다른 테스틀 작성했다. 때때로 다시 테스트가 성공하도록 되돌아 간뒤, 실패하는 테스트를 다시 작성하고 전진할 필요가 있다.
+- 기능이 복잡할때는, 간단한 버전부터 시작해보자. 예를 들어 완벽한 화폐 덧셈을 구현하기 전에 `5$ + 5$ = 10$` 을 만들어 볼 수 있다. 
+
 ## Day 2
 
-- ~공용 equal~
+- ~~공용 equal~~
 - ~~공용 times~~
 - ~~Franc, Dollar 중복~~
 - ~~Franc, Dollar 비교~~
