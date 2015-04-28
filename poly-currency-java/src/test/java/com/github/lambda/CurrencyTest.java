@@ -18,7 +18,6 @@ public class CurrencyTest {
 		assertEquals(Money.dollar(10), ten);
 
 		Money fifteenFranc = Money.franc(15);
-
 		assertEquals(Money.franc(30), fifteenFranc.times(2));
 	}
 
@@ -26,7 +25,6 @@ public class CurrencyTest {
 	public void testEquality() {
 		assertTrue(Money.dollar(5).equals(Money.dollar(5)));
 		assertFalse(Money.dollar(6).equals(Money.dollar(5)));
-		
 		assertTrue(Money.franc(5).equals(Money.franc(5)));
 		assertFalse(Money.franc(6).equals(Money.franc(5)));
 	}
@@ -44,7 +42,12 @@ public class CurrencyTest {
 
     @Test
     public void testSimpleAddtion() {
-        Money ten = Money.dollar(5).plus(Money.dollar(5));
-        assertTrue(ten.equals(Money.dollar(10)));
+		Money five = Money.dollar(5);
+		IExpression sum = five.plus(five);
+
+		Bank bank = new Bank();
+		Money reduced = bank.reduce(sum, "USD");
+
+		assertEquals(Money.dollar(10), reduced);
     }
 }

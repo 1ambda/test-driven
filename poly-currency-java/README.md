@@ -2,6 +2,37 @@
 
 [Ref: Test Driven Development: By Example][http://www.amazon.com/Test-Driven-Development-By-Example/dp/0321146530]
 
+## Day 4
+
+**TODO**
+
+- 5$ + 5$ = 10$
+- 5$ + 5$ 는 `Money`
+- 가짜 구현 `Money.plus` 리팩토링
+- 가짜 구현 'Bank.reduce` 리팩토링
+
+**LESSON**
+
+- 다중 통화를 표현하고 싶지만 시스템의 다른 부분이 모르도록 하고 싶다. 
+- 참조 통화 대신에, 다중 통화 *수식* 그 자체를 사용하고 싶다.
+- 이를 위해서 `Expression` 을 도입했다. 
+
+- `reduce` 의 책임을 `Expression` 이 아니라 `Bank` 에게 전가했다.
+- 이는 핵심 객체인 `Expression` 이 시스템의 다른부분에 대해서 모르도록 하기 위해서다.
+
+```java
+@Test
+public void testSimpleAddtion() {
+	Money five = Money.dollar(5);
+	Expression sum = five.plus(five);
+
+	Bank bank = new Bank();
+	Money reduced = bank.reduce(sum, "USD");
+
+	assertEquals(Money.dollar(10), reduced);
+}
+```
+
 ## Day 3
 
 **TODO**

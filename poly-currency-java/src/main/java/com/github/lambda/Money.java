@@ -1,6 +1,6 @@
 package com.github.lambda;
 
-public class Money {
+public class Money implements IExpression {
 	public Money(int amount, String currency) {
 		this.amount = amount;
 		this.currency = currency;
