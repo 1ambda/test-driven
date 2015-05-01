@@ -17,6 +17,14 @@ public class Money implements IExpression {
 	protected int amount;
 	protected String currency;
 
+	public int amount() {
+		return amount;
+	}
+
+	public Money reduce(String currency) {
+		return this;
+	}
+
 	public String currency() {
 		return currency;
 	}
@@ -25,8 +33,8 @@ public class Money implements IExpression {
 		return new Money(amount * multiplier, currency);
 	};
 
-    public Money plus(Money that) {
-        return null;
+    public IExpression plus (Money that) {
+        return new Sum(this, that);
     }
 	
 	@Override

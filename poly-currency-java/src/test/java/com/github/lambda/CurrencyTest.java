@@ -10,6 +10,36 @@ import org.junit.runners.JUnit4;
 @RunWith(JUnit4.class)
 public class CurrencyTest {
 
+    @Test
+    public void testReduceMoney() {
+        Money one = Money.dollar(1);
+        Bank bank = new Bank();
+        Money reduced = bank.reduce(one, "USD");
+
+        assertEquals(Money.dollar(1), reduced);
+    }
+
+    @Test
+    public void testPlusReturnSum() {
+        Money five = Money.dollar(5);
+        IExpression expr = five.plus(five);
+        Sum sum = (Sum) expr;
+
+        assertEquals(five, sum.augend());
+        assertEquals(five, sum.addend());
+    }
+
+	@Test
+	public void testSimpleAddtion() {
+		Money five = Money.dollar(5);
+		IExpression sum = five.plus(five);
+
+		Bank bank = new Bank();
+		Money reduced = bank.reduce((Sum) sum, "USD");
+
+		assertEquals(Money.dollar(10), reduced);
+	}
+
 	@Test
 	public void testMultiplication() {
 		Money five = Money.dollar(5);
@@ -40,14 +70,4 @@ public class CurrencyTest {
 		assertFalse(new Money(5, "USD").equals(new Money(5, "CHF")));
 	}
 
-    @Test
-    public void testSimpleAddtion() {
-		Money five = Money.dollar(5);
-		IExpression sum = five.plus(five);
-
-		Bank bank = new Bank();
-		Money reduced = bank.reduce(sum, "USD");
-
-		assertEquals(Money.dollar(10), reduced);
-    }
 }

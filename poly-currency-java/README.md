@@ -2,6 +2,90 @@
 
 [Ref: Test Driven Development: By Example][http://www.amazon.com/Test-Driven-Development-By-Example/dp/0321146530]
 
+## Day 6
+
+**TODO**
+
+- ~~5$ + 5$ = 10$~~
+- 5$ + 5$ 는 `Money`
+- ~~가짜 구현 `Money.plus` 리팩토링~~
+- ~~가짜 구현 'Bank.reduce` 리팩토링~~
+- `Money.times` 지저분하다.
+
+**LESSON**
+
+- 두 구현체 `Money`, `Sum` 에서 `reudce` 가 가능한지 검토하고, 인터페이스 메소드로 추출했다. 이 과정에서 지저분한 캐스팅이 사라졌다.
+
+즉, 명시적인 클래스 검사 및 캐스팅을 제거하기 위해 **다형성** 을 사용했다. 
+이 과정에서, 먼저 한곳에서 캐스팅을 이용해서 구현했다가 이후에 코드를 다른곳으로 옮겼다. 
+캐스팅을 이용해도 리팩토링에서 제거할 수 있으므로, 흘러가는대로 하면 된다는 사실을 깨달았다.
+  
+  
+```java
+// after
+public class Bank {
+    public Money reduce(IExpression expr, String to) {
+        return expr.reduce(to);
+    }
+}
+```
+
+  
+- 다시 한번, **리팩토링은 초록막대에서만 진행한다** 는 사실을 마음에 새겼다. 
+- 연산의 외부 행위가 아닌 내부 구현에 대해 집중하는 테스트는, 좋지 않다는 것을 배웠다.
+- 외부에서 내부 필드(Variable)에 너무나 많이 접근한다면 메서드 본문을 해당 클래스로 옮기는것도 생각해 볼 만하다.
+
+
+```java
+// before
+
+public class Bank {
+    public Money reduce(IExpression expr, String currency) {
+        Sum sum = (Sum) expr;
+
+        Money augend = sum.augend;
+        Money addend = sum.addend;
+
+        if (!augend.currency().equals(addend.currency())
+                && augend.currency().equals(currency))
+            return null;
+
+        return new Money(augend.amount() + addend.amount(), currency);
+    }
+}
+
+
+
+// after
+
+public class Bank {
+    public Money reduce(IExpression expr, String currency) {
+        if (expr instanceof Money) return (Money) expr;
+
+        Sum sum = (Sum) expr;
+        return sum.reduce(currency);
+    }
+}
+
+public class Sum implements IExpression {
+    ...
+    ...
+    
+    public Money reduce(String currency) {
+        if (!augend.currency().equals(addend.currency())
+                && augend.currency().equals(currency)) {
+            return null;
+        }
+
+        int amount = augend.amount() + augend.amount();
+
+        return new Money(amount, currency);
+    }
+
+}
+```
+ 
+
 ## Day 4
 
 **TODO**
