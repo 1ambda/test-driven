@@ -9,14 +9,46 @@ import org.junit.runners.JUnit4;
 
 @RunWith(JUnit4.class)
 public class CurrencyTest {
+    
+    @Test
+    public void testIdentityRate () {
+        assertEquals(1, new Bank().rate("USD", "USD"));
+    }
+
+    @Test
+    public void testArrayEquals () {
+        assertArrayEquals(
+                new Object[] {"USD", "CHF" },
+                new Object[] {"USD", "CHF"});
+    }
+
+    @Test
+    public void testReduceMoneyDifferentCurrency() {
+        Bank bank = new Bank();
+        bank.addRate("CHF", "USD", 2);
+
+        Money reduced = Money.franc(2).reduce(bank, "USD");
+        assertEquals(Money.dollar(1), reduced);
+    }
 
     @Test
     public void testReduceMoney() {
         Money one = Money.dollar(1);
         Bank bank = new Bank();
-        Money reduced = bank.reduce(one, "USD");
 
+        Money reduced = one.reduce(bank, "USD");
         assertEquals(Money.dollar(1), reduced);
+    }
+
+    @Test
+    public void testSimpleAddtion() {
+        Money five = Money.dollar(5);
+        IExpression sum = five.plus(five);
+
+        Bank bank = new Bank();
+        Money reduced = sum.reduce(bank, "USD");
+
+        assertEquals(Money.dollar(10), reduced);
     }
 
     @Test
@@ -28,17 +60,6 @@ public class CurrencyTest {
         assertEquals(five, sum.augend());
         assertEquals(five, sum.addend());
     }
-
-	@Test
-	public void testSimpleAddtion() {
-		Money five = Money.dollar(5);
-		IExpression sum = five.plus(five);
-
-		Bank bank = new Bank();
-		Money reduced = bank.reduce((Sum) sum, "USD");
-
-		assertEquals(Money.dollar(10), reduced);
-	}
 
 	@Test
 	public void testMultiplication() {

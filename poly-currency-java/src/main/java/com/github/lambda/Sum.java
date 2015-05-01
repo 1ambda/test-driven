@@ -18,14 +18,8 @@ public class Sum implements IExpression {
         this.addend = addend;
     }
 
-    public Money reduce(String currency) {
-        if (!augend.currency().equals(addend.currency())
-                && augend.currency().equals(currency)) {
-            return null;
-        }
-
+    public Money reduce(Bank bank, String currency) {
         int amount = augend.amount() + augend.amount();
-
         return new Money(amount, currency);
     }
 

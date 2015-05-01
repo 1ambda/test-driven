@@ -21,14 +21,16 @@ public class Money implements IExpression {
 		return amount;
 	}
 
-	public Money reduce(String currency) {
-		return this;
+	public Money reduce(Bank bank, String to) {
+		int rate = bank.rate(this.currency, to);
+		return new Money(amount / rate, to);
 	}
 
 	public String currency() {
 		return currency;
 	}
-	
+
+	// TODO
 	public Money times(int multiplier) {
 		return new Money(amount * multiplier, currency);
 	};

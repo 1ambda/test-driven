@@ -1,13 +1,170 @@
 # TDD Example: Poly Currency
 
-[Ref: Test Driven Development: By Example][http://www.amazon.com/Test-Driven-Development-By-Example/dp/0321146530]
+[Ref: Test Driven Development: By Example](http://www.amazon.com/Test-Driven-Development-By-Example/dp/0321146530)
 
 ## Day 6
 
 **TODO**
+- **통화 변환: 2 CHF -> 1 USD**
+- 다른 통화간 변환
+- 다른 환율간 덧셈
+
+**Summary**
+
+- 테스트 없이 `private` 헬퍼 메소드를 만들었다.
+- 자바의 `equals` 검증을 위한 테스트를 만들어 봤다.
+
+**LESSON**
+
+- 환율을 변환하기 위해 테스트를 먼저 작성했다. 그리고 가짜로 구현하는 과정에서, `Money` 가 환율을 알게된다는 사실에 절망했다.
+모든 책임은 `Bank` 에 있어야 한다. `reduce` 는 `Expression` 이 수행해야 하며, 환율을 아는 `Bank` 를 파라미터로 넘겨줘야겠다.
+
+```java
+// test
+@Test
+public void testReduceMoneyDifferentCurrency() {
+    Bank bank = new Bank();
+    bank.addRate("CHF", "USD", 2);
+    Money reduced = bank.reduce(Money.franc(2), "USD");
+    assertEquals(Money.dollar(1), reduced);
+}
+
+// Money.java
+public Money reduce(String to) {
+    int rate = (this.currency.equals("CHF") && to.equals("USD"))
+            ? 2 : 1;
+    return new Money(amount / rate, to);
+}
+```
+
+- 코드를 리팩토링 하기 전에, 테스트가 기능에 따라 영향을 받을 것 같아서 테스트를 먼저 수정했다. 이제 빨간막대다.
+이 과정을 끝내면 다른 통화간 덧셈을 구현.. 아니 테스트를 작성할 수 있다는 느낌이 들었다.
+
+```java
+@Test
+public void testReduceMoneyDifferentCurrency() {
+    Bank bank = new Bank();
+    bank.addRate("CHF", "USD", 2);
+
+    Money reduced = Money.franc(2).reduce(bank, "USD");
+    assertEquals(Money.dollar(1), reduced);
+}
+
+@Test
+public void testReduceMoney() {
+    Money one = Money.dollar(1);
+    Bank bank = new Bank();
+
+    Money reduced = one.reduce(bank, "USD");
+    assertEquals(Money.dollar(1), reduced);
+}
+
+@Test
+public void testSimpleAddtion() {
+    Money five = Money.dollar(5);
+    IExpression sum = five.plus(five);
+
+    Bank bank = new Bank();
+    Money reduced = sum.reduce(bank, "USD");
+
+    assertEquals(Money.dollar(10), reduced);
+}
+```
+
+```java
+// Money.java
+public Money reduce(Bank bank, String to) {
+    int rate = bank.rate(this.currency, to);
+    return new Money(amount / rate, to);
+}
+
+
+// Bank.java
+public int rate(String from, String to) {
+    return (from.equals("CHF") &&  to.equals("USD"))
+            ? 2 : 1;
+}
+```
+
+가짜로 구현했기 때문에, `2` 가 등장한다. 환율 테이블 표를 만들 수 있을까? 무엇을 이용하면 좋을지 생각해봤는데, 해시테이블은 어떨까?
+해시테이블에서 사용할 키로는 **두개의 통화** 를 써야한다. `Array` 가 동치성 검사를 제대로 해주는지 확인하기 위해 테스트를 작성했다.
+
+```java
+@Test
+public void testArrayEquals () {
+    assertArrayEquals(new Object[] {"USD"}, new Object[] {"USD"});
+}
+```
+
+책에서와는 달리 성공한다. `Pair` 객체를 구현하면서 무언가 또 배울 수 있을테니. 책을 쫓아가겠다. 
+
+- `Pair` 객체를 키로 사용하기 위해 `equals` 와 `hashCode` 를 오버라이딩 했다. 죄악을 저질렀지만 동작은 할 것 같다.
+만약 내가 컨텍스트를 모른채로 리팩토링하고 있었다면 테스트 코드를 먼저 작성해야 했을 것이다.
+
+그리고, `hashCode` 에서 `0` 했기 때문에 테이블에서 선형검색처럼 빠르게 검색될 것이다.
+나중에 통화의 종류가 많아지면 문제가 되겠지만, 일단 그건 그 때 생각하자. 
+
+```java
+public class Pair {
+    private String from;
+    private String to;
+
+    public Pair(String from, String to) {
+        this.from = from;
+        this.to = to;
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        // TODO
+        Pair that = (Pair) object;
+        return (from.equals(that.from) && to.equals(that.to));
+    }
+
+    @Override
+    public int hashCode() {
+        // TODO
+        return 0;
+    }
+}
+```
+
+- `Bank` 클래스에 테이블을 추가했다. 그리고 중간에, 같은 통화로의 `rate` 에 대해 테스트 실패가 일어나는걸 발견했는데
+ 꾹 참고 테스트부터 만들었다.
+
+```java
+public class Bank {
+
+    Hashtable<Pair, Integer> rates;
+
+    public Bank() {
+        rates = new Hashtable<Pair, Integer>(); ;
+    }
+
+    public void addRate(String from, String to, int rate) {
+        rates.put(new Pair(from, to), rate);
+    }
+
+    public int rate(String from, String to) {
+        if (from.equals(to)) return 1;
+        return rates.get(new Pair(from, to));
+    }
+}
+
+// test
+@Test
+public void testIdentityRate () {
+    assertEquals(1, new Bank().rate("USD", "USD"));
+}
+```
+
+- 추가적으로, `HashTable` 을 `ConcurrentHashMap` 으로 변경헀다.
+
+## Day 5
+
+**TODO**
 
 - ~~5$ + 5$ = 10$~~
-- 5$ + 5$ 는 `Money`
 - ~~가짜 구현 `Money.plus` 리팩토링~~
 - ~~가짜 구현 'Bank.reduce` 리팩토링~~
 - `Money.times` 지저분하다.
