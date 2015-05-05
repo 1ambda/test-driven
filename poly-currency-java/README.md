@@ -2,6 +2,92 @@
 
 [Ref: Test Driven Development: By Example](http://www.amazon.com/Test-Driven-Development-By-Example/dp/0321146530)
 
+
+## Retrospection
+
+- JUnit 이 로그를 남기도록 해서, 테스트를 얼마나 실행하는가 보는것도 자신의 패턴을 파악하는데 도움이 된다.
+
+- 코드 매트릭스, 즉 모델 코드와 테스트 코드 사이의 클래스, 함수, 줄, 복잡도 등을 나타냄으로써 테스트의 경제성을 파악할 수 있다.
+
+- 테스트의 질을 판별하기 위해 *coverage* 나, *defect insertion* 등을 사용할 수 있다.
+
+**JProbe**, **Jester**
+
+- 커버리지를 높이기 위해 테스트를 더 많이 작성하는 대신, 코드의 로직을 단순하게 할 수 있다.
+ 
+## Day 7: Ending
+
+**TODO** 
+- 다른 통화간 덧셈
+- `Money` 의 책임을 뺏어 `IExpression` 으로 옮기기 
+
+**LESSON**
+
+- 두 개의 서브클래스 `Money`, `Sum` 에서 동일한 함수 `plus` 를 발견했다. 추상클래스를 떠올려봤다.
+
+- TDD 의 경제성에 대해서 생각해 봤다.
+
+> TDD 로 구현할 땐 테스트의 라인 수와, 모델 코드의 라인 수가 거의 비슷한 상태로 끝난다. TDD가 경제적이려면 매일 만들어내는 코드가 두배가 되거나, 
+동일한 기능을 구현하되 절반의 줄 수로 해내야한다. TDD 가 본래 자신의 방법에 디해서 어떻게 다른지 직접 측정해 보는것이 필요한데, 이때는 디버깅, 통합작업, 
+다른사람에게 설명하는데 걸리는 시간 등을 반드시 포함해야 한다.  
+
+- 테스트가 코드보다 길다는것을 발견했다. 이 문제를 해결하기 위해 [JUnit Fixture](https://github.com/junit-team/junit/wiki/Test-fixtures) 를 사용했다.
+
+결국, 테스트는 비용과 관련된 문제이며, 픽스쳐를 이용하는것도 이 비용을 절감해준다는것을 알게 되었다. 테스트는 경제적이어야 한다.
+
+
+```java
+// before
+public IExpression plus(IExpression addend) {
+    return new Sum(this, addend);
+}
+
+@Test
+public void testSumPlus () {
+    IExpression fiveBucks = Money.dollar(5);
+    IExpression tenFrancs = Money.franc(10);
+
+    Bank bank = new Bank();
+    bank.addRate("CHF", "USD", 2);
+
+    IExpression sum = new Sum(fiveBucks, tenFrancs).plus(fiveBucks);
+    Money result = bank.reduce(sum, "USD");
+
+    assertEquals(Money.dollar(15), result);
+}
+```
+
+```java
+// after
+private IExpression fiveBucks;
+private IExpression tenFrancs;
+private Bank bank;
+
+@Before
+public void setUpClass() {
+    fiveBucks = Money.dollar(5);
+    tenFrancs = Money.franc(10);
+    bank = new Bank();
+    bank.addRate("CHF", "USD", 2);
+}
+
+@Test
+public void testSumTimes () {
+    IExpression sum = new Sum(fiveBucks, tenFrancs).times(2);
+    Money result = bank.reduce(sum, "USD");
+    assertEquals(Money.dollar(20), result);
+}
+
+@Test
+public void testSumPlus () {
+    IExpression sum = new Sum(fiveBucks, tenFrancs).plus(fiveBucks);
+    Money result = bank.reduce(sum, "USD");
+
+    assertEquals(Money.dollar(15), result);
+}
+```
+
+
 ## Day 6
 
 **TODO**

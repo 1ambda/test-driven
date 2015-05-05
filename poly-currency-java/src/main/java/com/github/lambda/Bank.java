@@ -8,7 +8,11 @@ public class Bank {
     Map<Pair, Integer> rates;
 
     public Bank() {
-        rates = new ConcurrentHashMap<Pair, Integer>(); ;
+        rates = new ConcurrentHashMap<Pair, Integer>();
+    }
+
+    public Money reduce(IExpression source, String to) {
+        return source.reduce(this, to);
     }
 
     public void addRate(String from, String to, int rate) {

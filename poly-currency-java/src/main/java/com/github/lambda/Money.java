@@ -31,12 +31,12 @@ public class Money implements IExpression {
 	}
 
 	// TODO
-	public Money times(int multiplier) {
+	public IExpression times(int multiplier) {
 		return new Money(amount * multiplier, currency);
 	};
 
-    public IExpression plus (Money that) {
-        return new Sum(this, that);
+    public IExpression plus (IExpression addend) {
+        return new Sum(this, addend);
     }
 	
 	@Override
