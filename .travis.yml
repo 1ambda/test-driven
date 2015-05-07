@@ -8,5 +8,5 @@ script:
   - cd $POLY_CURRENCY_JAVA_DIR && gradle check
 
 after_success:
-  - cd $POLY_CURRENCY_JAVA_DIR && gradle cobertura coveralls
+  - gradle cobertura coveralls
   
