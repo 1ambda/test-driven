@@ -1,0 +1,9 @@
+language: java
+jdk:
+  - oraclejdk8
+
+env:
+  - POLY_CURRENCY_JAVA_DIR=poly-currency-java
+script:
+  - cd $POLY_CURRENCY_JAVA_DIR && gradle check
+  
