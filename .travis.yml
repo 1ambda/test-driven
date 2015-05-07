@@ -6,4 +6,7 @@ env:
   - POLY_CURRENCY_JAVA_DIR=poly-currency-java
 script:
   - cd $POLY_CURRENCY_JAVA_DIR && gradle check
+
+after_success:
+  - cd $POLY_CURRENCY_JAVA_DIR && gradle cobertura coveralls
   
