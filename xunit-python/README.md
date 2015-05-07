@@ -1,7 +1,55 @@
 # XUnit Implementation using Python
 
-
 [Ref - Test Driven Development: By Example](http://www.amazon.com/Test-Driven-Development-Kent-Beck/dp/0321146530/ref=sr_1_1?s=books&ie=UTF8&qid=1430807061&sr=1-1&keywords=test+driven+development+by+example+in+Books)
+
+
+## Day 3
+
+### TODO
+
+- ~~테스트 메서드 호출하기~~
+- ~~먼저 `setUp` 호출하기~~
+- ~~나중에 `tearDown` 호출하기~~
+- 테스트 메서드가 실패하더라도, `tearDown` 호출하기
+- 여러개의 테스트를 실행하기
+- **수집된 결과를 출력하기**
+- **실패한 테스트 보고하기**
+
+### SUMMARY
+
+- 테스트를 작성할 때, 나에게 가르침을 줄 것 같고, 만들 수 있다는 확신이 드는 것 부터 구현했다.
+
+
+## Day 2
+
+### TODO
+
+- ~~테스트 메서드 호출하기~~
+- **먼저 `setUp` 호출하기**
+- **나중에 `tearDown` 호출하기**
+- 테스트 메서드가 실패하더라도, `tearDown` 호출하기
+- 여러개의 테스트를 실행하기
+- 수집된 결과를 출력하기
+
+### SUMMARY
+
+- 무언가 배우기를 기대한다면, 한 번의 하나의 메소드만 수정하면서 테스트가 성공할 수 있도록 고민하자.
+- `setUp` 에서 사용했던 플래그 전략을 버렸다. 플래그가 많아지니까 귀찮아졌다. 그리고 플래그보다 
+더 테스트 순서에 대해 자세히 기록할 수 있는 로그 방식을 택했다. 메소드의 본질에 집중하려고 노력했
+다
+
+```python
+class TestCaseSpec(TestCase):
+    def testTemplateMethod(self):
+        self.test = WasRun("testMethod")
+        self.test.run()
+        assert self.test.log == "setUp testMethod "
+
+TestCaseSpec("testTemplateMethod").run()
+```
+
+이렇게 변경하니까, 이제 `tearDown` 을 검사하는 일은 `setUp testMethod teatDown ` 과 로그를 비교하기만 하면 된다!
+
 
 ## Day 1
 

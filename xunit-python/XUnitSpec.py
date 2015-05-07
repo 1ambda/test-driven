@@ -2,12 +2,19 @@ from XUnit import *
 
 
 class TestCaseSpec(TestCase):
-    def testRunning(self):
-        test = WasRun("testMethod")
-        assert not test.wasRun
-        test.run()
-        assert test.wasRun
+    def testTemplateMethod(self):
+        self.test = WasRun("testMethod")
+        result = self.test.run()
+        assert "setUp testMethod tearDown" == self.test.log
+        assert "1 run, 0 failed" == result.summary()
 
-TestCaseSpec("testRunning").run()
+    def testBrokenMethod(self):
+        self.test = WasRun("brokenMethod")
+        result = self.test.run()
+        assert "1 run, 1 failed" == result.summary()
+
+
+TestCaseSpec("testTemplateMethod").run()
+TestCaseSpec("testBrokenMethod").run()
 
 
