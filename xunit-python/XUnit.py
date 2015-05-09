@@ -1,4 +1,19 @@
 
+class TestSuite:
+    def __init__(self):
+        self.tests = []
+
+    def add(self, case):
+        methods = [m for m in dir(case) if callable(getattr(case, m)) if m.startswith('test')]
+
+        for m in methods:
+            self.tests.append(case(m))
+
+
+    def run(self, result):
+        for t in self.tests:
+            t.run(result)
+
 class TestCase:
     def __init__(self, name):
         self.name = name
@@ -9,16 +24,23 @@ class TestCase:
     def tearDown(self):
         pass
 
-    def run(self):
-        self.setUp()
-        method = getattr(self, self.name)
-        method()
-        result = TestResult()
-        result.testStarted()
+    def run(self, result):
+        try:
+            self.setUp()
+        except Exception as e:
+            pass
+
+        try:
+            result.testStarted()
+            method = getattr(self, self.name)
+            method()
+        except Exception as e:
+            result.testFailed()
+
         self.tearDown()
         return result
 
-class WasRun(TestCase):
+class SuccessCase(TestCase):
     def __init__(self, name):
         TestCase.__init__(self, name)
         self.log = ""
@@ -31,6 +53,22 @@ class WasRun(TestCase):
 
     def tearDown(self):
         self.log += "tearDown"
+
+class FailureCase(TestCase):
+    def __init__(self, name):
+        TestCase.__init__(self, name)
+        self.log = ""
+
+    def setUp(self):
+        a = 1 / 0
+
+    def testMethod(self):
+        self.log += "testMethod "
+
+    def tearDown(self):
+        self.log += "tearDown"
+
+
 
 
 class TestResult:

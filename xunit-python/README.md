@@ -2,6 +2,144 @@
 
 [Ref - Test Driven Development: By Example](http://www.amazon.com/Test-Driven-Development-Kent-Beck/dp/0321146530/ref=sr_1_1?s=books&ie=UTF8&qid=1430807061&sr=1-1&keywords=test+driven+development+by+example+in+Books)
 
+> 소프트웨어 공학 역사에서 이렇게 짧은 코드로, 이토록 많은 사람이, 이런 큰 은혜를 입은적이 없었다.
+
+
+## Day 4
+ 
+### TODO
+
+- ~~테스트 메서드 호출하기~~
+- ~~먼저 `setUp` 호출하기~~
+- ~~나중에 `tearDown` 호출하기~~
+- ~~테스트 메서드가 실패하더라도, `tearDown` 호출하기~~
+- ~~수집된 결과를 출력하기~~
+- ~~실패한 테스트 보고하기~~
+- **여러개의 테스트를 실행하기**
+- **Suite 에 테스트 케이스를 인자로 넣으면, 자동으로 테스트 생성하기**
+
+### SUMMARY
+
+- 중간에 `finally` 때문에 디버깅에 애를 먹었다.
+
+- `setUp` 을 테스트하기 위해, 실패하는 `setUp` 을 가진 클래스 `InvalidSetup` 을 만들었다. 이제 `testBorkenMethod` 를 `InvalidSetup` 을 이용해
+서 진행했고, 많은 중복을 제거할 수 있었다. 돌이켜 보니 `InvalidSetup` 이란 이름 대신에, `FailedCase` 란 이름이 더 나을 것 같다. 
+`WasRun` 도 `SuccessCase` 로 변경했다. 이제 각각 성공과 실패의 책임을 담당하는 분리된 테스트 케이스를 가지게 되었다.
+
+```python
+def testFailedCase(self):
+    self.test = FailedCase("brokenMethod")
+    result = self.test.run()
+    # failed to setup
+    assert("tearDown" == self.test.log)
+    # failed to call the test method
+    assert("1 run, 1 failed" == result.summary())
+    
+class FailedCase(TestCase):
+    def __init__(self, name):
+        TestCase.__init__(self, name)
+        self.log = ""
+
+    def setUp(self):
+        a = 1 / 0
+
+    def testMethod(self):
+        self.log += "testMethod "
+
+    def tearDown(self):
+        self.log += "tearDown"
+```
+
+- 테스트 하나와 테스트 집단 (`TestSuite`) 를 동일하게 다루기 위해 [컴포지트 패턴](https://www.wikiwand.com/en/Composite_pattern) 을 도입했다. 
+ 이 이름보다는 `Tree` 라는 이름이 더 직관적이다. 켄트백이 말하는 **적절한 메타포** 에 더 가까운것 같고.
+
+![](http://rpouiller.developpez.com/tutoriel/java/design-patterns-gang-of-four/images/designPatternStructuralComposite.png)
+
+```python
+suite =  TestSuite()
+suite.add(TestCaseSpec("testTemplateMethod"))
+suite.add(TestCaseSpec("testFailedCase"))
+suite.add(TestCaseSpec("testTestSuite"))
+
+result = TestResult()
+suite.run(result)
+print result.summary()
+
+```
+
+```python
+class TestSuite:
+    def __init__(self):
+        self.tests = []
+
+    def add(self, test):
+        self.tests.append(test)
+
+    def run(self, result):
+        for t in self.tests:
+            t.run(result)
+
+class TestCase:
+    def __init__(self, name):
+        self.name = name
+
+    def setUp(self):
+        pass
+
+    def tearDown(self):
+        pass
+
+    def run(self, result):
+        try:
+            self.setUp()
+        except Exception as e:
+            pass
+
+        try:
+            result.testStarted()
+            method = getattr(self, self.name)
+            method()
+        except Exception as e:
+            result.testFailed()
+
+        self.tearDown()
+        return result
+```
+
+- 매번 `add` 로 `TestSuite` 에 추가하는 것이 귀찮아서 `add` 인자로 `TestCase` 를 넣으면, 자동으로 실행하게끔 만들었다.
+ 당연히 테스트케이스 부터 작성했다.
+
+```python
+# test case
+def testSuiteAdd(self):
+    suite = TestSuite()
+    suite.add(SampleSpec)
+    suite.add(SuccessCase)
+    suite.add(FailureCase)
+    suite.run(self.result)
+
+    assert("4 run, 1 failed" == self.result.summary())
+
+# example TestCase subclass
+class SampleSpec(TestCase):
+    def testSuccess(self):
+        assert(1 == 1)
+
+    def testFailure(self):
+        assert(1 == 2)
+        
+# add Impl in `TestSuite`
+def add(self, case):
+    methods = [m for m in dir(case) if callable(getattr(case, m)) if m.startswith('test')]
+
+    for m in methods:
+        self.tests.append(case(m))
+```
+
+다 만들고 보니, 제거할 테스트가 생겨서 정리했다.
+
+
+
 
 ## Day 3
 
@@ -14,6 +152,8 @@
 - 여러개의 테스트를 실행하기
 - **수집된 결과를 출력하기**
 - **실패한 테스트 보고하기**
+
+- 동적으로 메소드 찾아서 실행하기
 
 ### SUMMARY
 
